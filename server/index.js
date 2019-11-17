@@ -7,11 +7,18 @@ const mongodb = require('mongodb');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const bcrypt  = require('bcrypt');
+const { checkToken } = require('./utils/auth.js')
 
 //NOTE(ol): global path like .exe path in game programming
 const path = require('path');
 //
 
+
+///////////////////////************ ROUTERS *************////////////////////
+
+const userRouter = require(path.resolve(__dirname, 'routes/user.js'))
+
+////////////////////////////////////////////////////////////////////
 
 const listModel = require(path.resolve(__dirname, 'models/list.js'));
 const userModel = require(path.resolve(__dirname, 'models/users.js'));
@@ -21,11 +28,6 @@ if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 	// console.log(result);
 
 } 
-
-const SUCCESS = "SUCCESS";
-const FAILED = "FAILED";
-const ERROR = "ERROR";
- 
 
 const app = express();
 
@@ -65,26 +67,8 @@ mongoose.connect(process.env.DB_CONNECTION_STRING, { useNewUrlParser: true, useU
 
 ///////
 
-app.get('/*', (req, res) => {
-	res.sendFile(path.resolve(__dirname, "app/index.html"));
-});
 
-app.get('/*:param', (req, res) => {
-	res.sendFile(path.resolve(__dirname, "app/index.html"));
-});
-
-// app.post('/', (req, res) => {
-// 	console.log(req);
-// 	res.render('main', {
-// 		message: process.env.MY_NAME 
-// 	});
-// });
-
-// app.get('/about', (req, res, next) => {
-// 	res.render('about.ejs', {
-// 		message: 'This is the about page'
-// 	});
-// });
+app.use('/user', userRouter);
 
 app.post('/getAllTodos', (req, res, next) => {
 	listModel.find({}, (error, result) => {
@@ -95,31 +79,6 @@ app.post('/getAllTodos', (req, res, next) => {
 	});
 });
 
-let checkToken = (req, res, next) => {
-	const token = req.cookies.jwt_token;
-
-	if (token) {
-        jwt.verify(token, process.env.MY_SECRET_KEY, (err, decoded) => {
-        	if(err) {
-        		return res.status(403).json({
-        			result: ERROR,
-        			data: {},
-        			message: 'there was an error verifying your login' 
-        		});
-        	} else {
-        		console.log(decoded);
-        		req.email = decoded.email;
-        		return next();
-        	}
-   		});
-	} else {
-		return res.json({
-			result: FAILED,
-			data: {},
-			message: 'You are not logged in' 
-		});
-	}
-}
 
 
 app.post('/getSecretMessage', checkToken, (req, res, next) => {
@@ -133,144 +92,9 @@ app.post('/getSecretMessage', checkToken, (req, res, next) => {
 	});
 });
 
-app.post('/isLoggedIn', checkToken, (req, res) => {
-	console.log(req.email);
-	userModel.find({email: req.email}, (error, document) => {
-		if(error) {
-			return next(error);
-		} else {
-			const result = {
-				_id: document._id,
-				email: document.email,
-				isLoggedIn: true,
-			};
-
-			res.json({
-				result: SUCCESS,
-				data: result,
-				message: 'is logged in',
-			});
-		}
-	});
-
-	
-});
-
-app.post('/logout', checkToken, (req, res) => {
-
-	//delete cookie
-	res.cookie('jwt_token', {}, {maxAge: 0, httpOnly: true, secure: false, overwrite: true});
-
-	res.json({
-		successful: true,
-		reason: 'you logged out',
-	});
-});
 
 
 
-app.post('/login', (req, httpRes, next) => {
-	const email = req.body.email;
-	const password = req.body.password;
-
-	userModel.find({ email: email }, (err, documentResult) => {
-		if(err) {
-			//NOTE(ollie): go to the express middleware to handle error
-			return next(err);
-		}
-
-		if(documentResult.length > 0) {
-			//NOTE(ol): user exists
-
-			const documentPassword = documentResult[0].password;
-
-			bcrypt.compare(password, documentPassword, function(encryptError, res) {
-			    if(encryptError) {
-			    	httpRes.status(501).json({
-			    		successful: false,
-			    		reason: "couldn't encrypt"
-			    	});
-			    } else if(res == true) {
-			    		
-			    	//CREATE TOKEN
-		    		let token = jwt.sign({email: email}, process.env.MY_SECRET_KEY, { expiresIn: '24h'} );
-
-		    		//STICK IT IN A COOKIE
-		    		httpRes.cookie('jwt_token', token, {maxAge: 90000000, httpOnly: true, secure: false, overwrite: true});
-
-		    		//SEND BACK THE RESULT
-		    		httpRes.json({
-		    			successful: true,
-		    			reason: "logged in successful"
-		    		});
-			    } else {
-			    	//DELETE TOKEN COOKIE
-			    	httpRes.cookie('jwt_token', {}, {maxAge: 0, httpOnly: true, secure: false, overwrite: true});
-		    		
-			    	//SEND BACK RESULT
-		    		httpRes.json({
-		    			successful: false,
-		    			_id: documentResult._id,
-		    			reason: "Password was wrong"
-		    		});
-			    }
-			});
-		} else {
-			//NOTE(ol): Username doesn't exist
-			httpRes.json({
-				successful: false,
-				reason: "The username doesn't exist."
-			});
-		}
-	});
-});
-
-app.post('/register', (req, httpRes, next) => {
-	const email = req.body.email;
-	const password = req.body.password;
-
-	userModel.find({ email: email }, (err, documentResult) => {
-		if(err) {
-			//NOTE(ollie): go to the express middleware to handle error
-			return next(err);
-		}
-
-		if(documentResult.length == 0) {
-			//NOTE(ol): No one has taken this username
-
-			const newUser = new userModel({
-				password: password,
-				email: email
-			});
-
-			newUser.save((err, result) => {
-				if(err) {
-					//NOTE(ollie): go to the express middleware to handle error
-					return next(err);
-				}
-
-				let token = jwt.sign({email: email}, process.env.MY_SECRET_KEY, { expiresIn: '24h'} );
-
-				httpRes.cookie('jwt_token', token, {maxAge: 90000000, httpOnly: true, secure: false, overwrite: true});
-
-				httpRes.json({
-					successful: true,
-					_id: result._id,
-					reason: "User created"
-				});
-
-			});
-
-
-		} else {
-			//NOTE(ol): Username is taken already
-			httpRes.json({
-				successful: false,
-				reason: "This username is taken."
-			});
-		}
-	});
-});
 
 
 app.post('/addTodo', (req, res, next) => {
@@ -308,6 +132,13 @@ app.post('/alterTodo', (req, res, next) => {
 			success: true
 		});
 	});
+});
+
+
+//Handle all other request
+
+app.get('/*', (req, res) => {
+	res.sendFile(path.resolve(__dirname, "../app/public/index.html"));
 });
 
 

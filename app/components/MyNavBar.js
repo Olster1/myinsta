@@ -3,8 +3,8 @@ import {
   Link
 } from "react-router-dom";
 
-const MyNavBar = ({ loggedIn, logout, login}) => {
-  let loginLink = <Link to='/login' onClick={ login } >Login</Link>;
+const MyNavBar = ({ loggedIn, logout }) => {
+  let loginLink = <Link to='/login'>Login</Link>;
   let registerLink = <Link to='/register'>Register</Link>;
   let logoutLink = false;
 

@@ -17,7 +17,7 @@ import MyNavBar from './MyNavBar.js';
 
 ///////////////************ API *************////////////////////
 
-import {  isLoggedIn } from "../utils/api"
+import {  isLoggedIn, logout } from "../utils/api"
 
 //////////////////////////////////////
 
@@ -46,10 +46,6 @@ class App extends Component {
       loggedIn: false,
     };
 
-
-    //Bind this to the functions
-    this.logout = this.logout.bind(this);
-    this.login = this.login.bind(this);
   }
 
 
@@ -57,20 +53,10 @@ class App extends Component {
    this.props.tryLogin();
   }
 
-  logout() {
-    console.log("Logout");
-    this.setState({ loggedIn: false });
-  }
-
-  login() {
-    console.log("Login");
-    this.setState({ loggedIn: true });
-  }
-
   render() {
     return (
       <div>
-        <MyNavBar loggedIn={this.state.loggedIn} logout={this.logout} login={this.login} />
+        <MyNavBar loggedIn={this.props.isLoggedIn} logout={this.props.logout} />
         <Switch>
           <Route path="/register">
             <Register />
@@ -95,11 +81,12 @@ class App extends Component {
 
 
 const mapStateToProps = (state, ownProps) => ({
-  active: ownProps.filter === state.visibilityFilter
+  isLoggedIn: state.userInfo.isLoggedIn
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   tryLogin: function() {
+    console.log("try log in");
     dispatch(setLoadingUser(true));
     isLoggedIn((result, message, data) => {
       console.log(message);
@@ -113,6 +100,26 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
         );
       } else {
         dispatch(setUserData(data));
+        console.log("setting user info");
+      }
+      console.log("setting loading to false");
+      dispatch(setLoadingUser(false));
+    })
+  },
+  logout: function() {
+    console.log("loggingOut");
+    dispatch(setLoadingUser(true));
+    logout((result, message, data) => {
+      console.log(message);
+      if(result === "ERROR" || result === "FAILED") {
+        console.log("failed");
+      } else {
+        dispatch(setUserData({
+            isLoggedIn: false,
+            email: "",
+            _id: null
+          })
+        );
         console.log("setting user info");
       }
       console.log("setting loading to false");

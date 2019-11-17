@@ -1,3 +1,5 @@
+///////////////////////*********** Helper functions **************////////////////////
+
 function handle500Error(response) {
 	if(!response.ok) {
 		console.log(response);
@@ -22,94 +24,7 @@ function buildPostRequest(url, data) {
 	return request;
 }
 
-export function registerUser(email, password, onSuccess, onFail) {
-
-	let request = buildPostRequest('http://localhost:8080/register', {
-			email: email,
-			password: password
-		});
-
-		fetch(request)
-		.then(handle500Error)
-		.then((resp) => resp.json())
-		.then((data) => {
-			if(data.successful) {
-				console.log("successful");
-				onSuccess(data.reason, data._id);	
-			} else {
-				console.log("not successful");
-				console.log(data.reason);
-				onFail(data.reason);
-			}
-			
-		}).catch((error) => {
-			console.log(error);
-			onFail("Something went wrong");
-		});
-	}
-
-export function loginUser(email, password, onSuccess, onFail) {
-
-		const myHeaders = new Headers();
-		myHeaders.append("Content-Type", "application/json");
-		const url = 'http://localhost:8080/login';
-
-		const request = new Request(url, {
-			method: 'POST',
-			body: JSON.stringify({
-				email: email,
-				password: password
-			}), 
-			headers: myHeaders
-
-		});
-
-		fetch(request)
-		.then(handle500Error)
-		.then((resp) => resp.json())
-		.then((data) => {
-			if(data.successful) {
-				console.log("successful");
-				onSuccess(data.reason, data._id);	
-			} else {
-				console.log("not successful");
-				console.log(data.reason);
-				onFail(data.reason);
-			}
-			
-		}).catch((error) => {
-			console.log(error);
-			onFail("Something went wrong");
-		});
-	}
-
-export function getSecretMessage(callback) {
-
-		const myHeaders = new Headers();
-		myHeaders.append("Content-Type", "application/json");
-		const url = 'http://localhost:8080/getSecretMessage';
-
-		const request = new Request(url, {
-			method: 'POST',
-			headers: myHeaders
-
-		});
-
-		fetch(request)
-		.then(handle500Error)
-		.then((resp) => resp.json())
-		.then((data) => {
-			callback(data.reason, !data.successful);
-		}).catch((error) => {
-			console.log(error);
-			callback("Something went wrong", true);
-		});
-	}
-
-export function isLoggedIn(callback) {
-
-	let request = buildPostRequest('http://localhost:8080/isLoggedIn', {});
-
+function sendRequest(request, callback) {
 	fetch(request)
 	.then(handle500Error)
 	.then((resp) => resp.json())
@@ -120,24 +35,38 @@ export function isLoggedIn(callback) {
 	});
 }
 
+
+
+///////////////////////************ Our api *************////////////////////
+
+export function registerUser(email, password, callback) {
+
+	let request = buildPostRequest('http://localhost:8080/user/register', {
+			email: email,
+			password: password
+		});
+
+	sendRequest(request, callback)
+}
+
+
+export function loginUser(email, password, callback) {
+
+	let request = buildPostRequest('http://localhost:8080/user/login', {
+			email: email,
+			password: password
+		});
+
+	sendRequest(request, callback)
+}
+
+
+export function isLoggedIn(callback) {
+	let request = buildPostRequest('http://localhost:8080/user/isLoggedIn', {});
+	sendRequest(request, callback);
+}
+
 export function logout(callback) {
-	const myHeaders = new Headers();
-	myHeaders.append("Content-Type", "application/json");
-	const url = 'http://localhost:8080/logout';
-
-	const request = new Request(url, {
-		method: 'POST',
-		headers: myHeaders
-
-	});
-
-	fetch(request)
-	.then(handle500Error)
-	.then((resp) => resp.json())
-	.then((data) => {
-		callback(data.reason, !data.successful);
-	}).catch((error) => {
-		console.log(error);
-		callback("Something went wrong", true);
-	});
+	let request = buildPostRequest('http://localhost:8080/user/logout', {});
+	sendRequest(request, callback);
 }
