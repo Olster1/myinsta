@@ -70,3 +70,11 @@ export function logout(callback) {
 	let request = buildPostRequest('http://localhost:8080/user/logout', {});
 	sendRequest(request, callback);
 }
+
+
+export function payFor(callback) {
+	let request = buildPostRequest('http://localhost:8080/checkout/membership', {
+		paymentType: 'level0'
+	});
+	sendRequest(request, callback);
+}

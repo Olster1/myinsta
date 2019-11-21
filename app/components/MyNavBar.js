@@ -3,40 +3,47 @@ import {
   Link
 } from "react-router-dom";
 
+
+import { LinkContainer } from 'react-router-bootstrap' 
+
+import { Navbar, Nav } from 'react-bootstrap';
+
+/*
+We use LinkContainer to use react-router <Link to='/'>, but we want bootstrap styling to apply to the links
+
+*/
+
 const MyNavBar = ({ loggedIn, logout }) => {
-  let loginLink = <Link to='/login'>Login</Link>;
-  let registerLink = <Link to='/register'>Register</Link>;
+  let loginLink = <LinkContainer  to='/login'><Nav.Link>Login</Nav.Link></LinkContainer>
+  let registerLink = <LinkContainer  to='/register'><Nav.Link>Register</Nav.Link></LinkContainer>
   let logoutLink = false;
+  let checkoutLink = false;
 
   if(loggedIn) {
     loginLink = false;
     registerLink = false;
-    logoutLink = <Link to='/' onClick={ logout }>Logout</Link>
+    logoutLink = <Nav.Link onClick={ logout } >Logout</Nav.Link>
+    checkoutLink=  <LinkContainer  to='/checkout'><Nav.Link>Checkout</Nav.Link></LinkContainer>
   }
 
   return (
-    <nav>
-      <Link to='/'>Home</Link>
-      { loginLink }
-      { registerLink }
-      { logoutLink } 
-      <Link to='/feed'>Feed</Link>
-      <Link to='/post/0'>Single Post</Link>
-      <Link to='/profile/0'>Profile</Link>
-    </nav>
+    <Navbar bg="light" expand="lg">
+      <LinkContainer  to='/'><Navbar.Brand><img src='/learnityHQLogo.png' width='300' className="d-inline-block align-top" alt='logo'/></Navbar.Brand></LinkContainer>
+      <Navbar.Toggle aria-controls="basic-navbar-nav" />
+      <Navbar.Collapse id="basic-navbar-nav">
+        <Nav className="mr-auto">
+        <LinkContainer  to='/'><Nav.Link>Home</Nav.Link></LinkContainer>
+        { loginLink }
+        { registerLink }
+        { checkoutLink }
+        <LinkContainer  to='/feed'><Nav.Link>Feed</Nav.Link></LinkContainer>
+        <LinkContainer  to='/post/0'><Nav.Link>Single Post</Nav.Link></LinkContainer>
+        <LinkContainer  to='/profile/0'><Nav.Link>Profile</Nav.Link></LinkContainer>
+        { logoutLink } 
+        </Nav>
+      </Navbar.Collapse>
+    </Navbar>
   );
 }
-
-//
-// TodoList.propTypes = {
-//   todos: PropTypes.arrayOf(
-//     PropTypes.shape({
-//       id: PropTypes.number.isRequired,
-//       completed: PropTypes.bool.isRequired,
-//       text: PropTypes.string.isRequired
-//     }).isRequired
-//   ).isRequired,
-//   toggleTodo: PropTypes.func.isRequired
-// }
 
 export default MyNavBar;

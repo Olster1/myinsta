@@ -7,16 +7,17 @@ const mongodb = require('mongodb');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const bcrypt  = require('bcrypt');
+
 const { checkToken } = require('./utils/auth.js')
 
 //NOTE(ol): global path like .exe path in game programming
 const path = require('path');
 //
 
-
 ///////////////////////************ ROUTERS *************////////////////////
 
 const userRouter = require(path.resolve(__dirname, 'routes/user.js'))
+const checkoutRouter = require(path.resolve(__dirname, 'routes/checkout.js'))
 
 ////////////////////////////////////////////////////////////////////
 
@@ -69,6 +70,8 @@ mongoose.connect(process.env.DB_CONNECTION_STRING, { useNewUrlParser: true, useU
 
 
 app.use('/user', userRouter);
+
+app.use('/checkout', checkoutRouter);
 
 app.post('/getAllTodos', (req, res, next) => {
 	listModel.find({}, (error, result) => {

@@ -37,6 +37,8 @@ import Profile from '../containers/Profile';
 import Login from '../containers/Login';
 import Register from '../containers/Register';
 
+import MyStoreCheckout from './MyStoreCheckout';
+
 ////////////////////////////////////////////////
 
 class App extends Component {
@@ -72,6 +74,9 @@ class App extends Component {
           </Route>
           <Route path="/post/:postId">
             <SinglePost profileId={1} />
+          </Route>
+          <Route path="/checkout">
+            <MyStoreCheckout />
           </Route>
         </Switch>
       </div>

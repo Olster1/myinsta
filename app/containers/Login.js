@@ -8,17 +8,20 @@ import { connect } from 'react-redux';
 
 import {  loginUser } from "../utils/api"
 
-//////////////////////////////////////
 
 //////*********** ACTIONS *******////////////
 
 import { setUserData, setLoadingUser } from "../actionReducers/user.js";
 
-
 /////********** COMPONENTS *********///////////
 
 import Loader from '../components/Loader';
 
+///////////////////////*********** Bootsrap Components **************////////////////////
+
+import { Form, Button} from 'react-bootstrap'
+
+////////////////////////////////////////////////////////////////////
 
 class Login extends Component {
 	constructor() {
@@ -37,7 +40,7 @@ class Login extends Component {
 	  this.setState({password: event.target.value});
 	}
 
-	handleSubmit() {
+	handleSubmit(event) {
 		event.preventDefault();
 
 		this.props.tryLogin(this.state.email, this.state.password);
@@ -56,20 +59,27 @@ class Login extends Component {
 			)
 		} else {
 			return (
-		        <div>
-		          <form onSubmit={this.handleSubmit.bind(this)}>
-		            <label>
-		              Email:
-		              <input type="email" value={this.state.email} onChange={this.updateEmail.bind(this)} />
-		            </label>
-		            <br />
-		            <label>
-		              Password:
-		              <input type="password" value={this.state.password} onChange={this.updatePassword.bind(this)} />
-		            </label>
-		             <br />
-		            <input type="submit" value="Submit" />
-		          </form>
+		        <div className="my-form-div">
+		          <Form onSubmit={this.handleSubmit.bind(this)}>
+		            <Form.Group controlId="formBasicEmail">
+		              <Form.Label>Email address</Form.Label>
+		              <Form.Control type="email" placeholder="Enter email" value={this.state.email} onChange={this.updateEmail.bind(this)} />
+		              <Form.Text className="text-muted">
+		                We'll never share your email with anyone else.
+		              </Form.Text>
+		            </Form.Group>
+
+		            <Form.Group controlId="formBasicPassword">
+		              <Form.Label>Password</Form.Label>
+		              <Form.Control type="password" placeholder="Password" value={this.state.password} onChange={this.updatePassword.bind(this)} />
+		            </Form.Group>
+		            <Form.Group controlId="formBasicCheckbox">
+		              <Form.Check type="checkbox" label="Check me out" />
+		            </Form.Group>
+		            <Button variant="primary" type="submit">
+		              Submit
+		            </Button>
+		          </Form>   
 		          { spinner }
 		          <p>{this.props.loginErrorMessage}</p>
 		        </div>
@@ -77,6 +87,7 @@ class Login extends Component {
 		}
 	}
 }
+
 
 const mapStateToProps = (state, ownProps) => ({
   loginErrorMessage: state.loginErrorMessage,
