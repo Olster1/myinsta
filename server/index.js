@@ -18,6 +18,7 @@ const path = require('path');
 
 const userRouter = require(path.resolve(__dirname, 'routes/user.js'))
 const checkoutRouter = require(path.resolve(__dirname, 'routes/checkout.js'))
+const learningPlanRouter = require(path.resolve(__dirname, 'routes/learningPlans.js'))
 
 ////////////////////////////////////////////////////////////////////
 
@@ -68,10 +69,16 @@ mongoose.connect(process.env.DB_CONNECTION_STRING, { useNewUrlParser: true, useU
 
 ///////
 
+///////////////////////*********** Assign routers **************////////////////////
 
 app.use('/user', userRouter);
 
+app.use('/learningPlans', learningPlanRouter);
+
 app.use('/checkout', checkoutRouter);
+
+////////////////////////////////////////////////////////////////////
+
 
 app.post('/getAllTodos', (req, res, next) => {
 	listModel.find({}, (error, result) => {

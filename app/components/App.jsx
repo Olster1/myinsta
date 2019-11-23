@@ -31,13 +31,15 @@ import { setUserData, setLoadingUser } from "../actionReducers/user.js";
 
 /////********** MAIN PAGES *********///////////
 
-import Feed from '../containers/Feed';
-import SinglePost from '../containers/SinglePost';
 import Profile from '../containers/Profile';
 import Login from '../containers/Login';
 import Register from '../containers/Register';
-
+import LearningPlan from '../containers/LearningPlan';
+import LearningPlansOverview from '../containers/LearningPlansOverview';
 import MyStoreCheckout from './MyStoreCheckout';
+import Loader from './Loader';
+import Default404 from './404';
+import HomePage from './Homepage';
 
 ////////////////////////////////////////////////
 
@@ -45,40 +47,48 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      loggedIn: false,
+      loading: true,
     };
 
   }
 
+  getMyRoutes() {
+    return (
+      <Switch>
+        <Route path="/register">
+          <Register />
+        </Route>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <Route path="/plan/:planId" component={LearningPlan} />
+        <Route path="/plans">
+          <LearningPlansOverview />
+        </Route>
+        <Route path="/profile/:profileId">
+          <Profile />
+        </Route>
+        <Route path="/checkout">
+          <MyStoreCheckout />
+        </Route>
+        <Route>
+          <Default404 />
+        </Route>
+      </Switch>
+    );
+  }
 
-  componentDidMount() {
-   this.props.tryLogin();
+
+  componentDidMount () {
+   this.props.tryLogin(this);
   }
 
   render() {
+    const routes = (this.state.loading) ? <Loader /> : this.getMyRoutes();
     return (
       <div>
         <MyNavBar loggedIn={this.props.isLoggedIn} logout={this.props.logout} />
-        <Switch>
-          <Route path="/register">
-            <Register />
-          </Route>
-          <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/feed">
-            <Feed />
-          </Route>
-          <Route path="/profile/:profileId">
-            <Profile profileId={0} />
-          </Route>
-          <Route path="/post/:postId">
-            <SinglePost profileId={1} />
-          </Route>
-          <Route path="/checkout">
-            <MyStoreCheckout />
-          </Route>
-        </Switch>
+        { routes }
       </div>
     );
   }
@@ -86,11 +96,12 @@ class App extends Component {
 
 
 const mapStateToProps = (state, ownProps) => ({
-  isLoggedIn: state.userInfo.isLoggedIn
+  isLoggedIn: state.userInfo.isLoggedIn,
+
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  tryLogin: function() {
+  tryLogin: function(it) {
     console.log("try log in");
     dispatch(setLoadingUser(true));
     isLoggedIn((result, message, data) => {
@@ -108,6 +119,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
         console.log("setting user info");
       }
       console.log("setting loading to false");
+      it.setState({loading: false});
       dispatch(setLoadingUser(false));
     })
   },

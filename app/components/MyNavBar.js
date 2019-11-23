@@ -36,6 +36,7 @@ const MyNavBar = ({ loggedIn, logout }) => {
         { loginLink }
         { registerLink }
         { checkoutLink }
+        <LinkContainer  to='/plan/0'><Nav.Link>Plan</Nav.Link></LinkContainer>
         <LinkContainer  to='/feed'><Nav.Link>Feed</Nav.Link></LinkContainer>
         <LinkContainer  to='/post/0'><Nav.Link>Single Post</Nav.Link></LinkContainer>
         <LinkContainer  to='/profile/0'><Nav.Link>Profile</Nav.Link></LinkContainer>

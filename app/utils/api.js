@@ -41,7 +41,7 @@ function sendRequest(request, callback) {
 
 export function registerUser(email, password, callback) {
 
-	let request = buildPostRequest('http://localhost:8080/user/register', {
+	let request = buildPostRequest('/user/register', {
 			email: email,
 			password: password
 		});
@@ -52,7 +52,7 @@ export function registerUser(email, password, callback) {
 
 export function loginUser(email, password, callback) {
 
-	let request = buildPostRequest('http://localhost:8080/user/login', {
+	let request = buildPostRequest('/user/login', {
 			email: email,
 			password: password
 		});
@@ -62,19 +62,42 @@ export function loginUser(email, password, callback) {
 
 
 export function isLoggedIn(callback) {
-	let request = buildPostRequest('http://localhost:8080/user/isLoggedIn', {});
+	let request = buildPostRequest('/user/isLoggedIn', {});
 	sendRequest(request, callback);
 }
 
 export function logout(callback) {
-	let request = buildPostRequest('http://localhost:8080/user/logout', {});
+	let request = buildPostRequest('/user/logout', {});
 	sendRequest(request, callback);
 }
 
 
 export function payFor(callback) {
-	let request = buildPostRequest('http://localhost:8080/checkout/membership', {
+	let request = buildPostRequest('/checkout/membership', {
 		paymentType: 'level0'
 	});
 	sendRequest(request, callback);
 }
+
+export function getPlansForUser(callback) {
+	let request = buildPostRequest('/learningPlans/getPlansForUser', {});
+	sendRequest(request, callback);
+}
+
+export function addPlanForUser(objective, isPublic, endDate, callback) {
+	let request = buildPostRequest('/learningPlans/createPlan', {
+		objective: objective, 
+		isPublic: isPublic,
+		endDate: endDate
+	});
+	sendRequest(request, callback);
+}
+
+export function removePlanFromUser(id, callback) {
+	let request = buildPostRequest('/learningPlans/deletePlan', { 
+		planId: id
+	});
+	sendRequest(request, callback);
+}
+
+

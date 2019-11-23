@@ -14,7 +14,7 @@ module.exports.checkToken = function(req, res, next) {
         		});
         	} else {
         		console.log(decoded);
-        		req.email = decoded.email;
+        		req.userId = decoded.userId;
         		return next();
         	}
    		});
@@ -25,4 +25,28 @@ module.exports.checkToken = function(req, res, next) {
 			message: 'You are not logged in' 
 		});
 	}
+}
+
+module.exports.checkNoToken = function(req, res, next) {
+    const token = req.cookies.jwt_token;
+
+    if (token) {
+        jwt.verify(token, process.env.MY_SECRET_KEY, (err, decoded) => {
+            if(err) {
+                return res.status(403).json({
+                    result: constants.ERROR,
+                    data: {},
+                    message: 'there was an error verifying your login' 
+                });
+            } else {
+               return res.json({
+                   result: constants.FAILED,
+                   data: {},
+                   message: 'You are logged in' 
+               });
+            }
+        });
+    } else {
+        return next();
+    }
 }

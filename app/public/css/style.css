@@ -1,3 +1,7 @@
+body {
+	font-family: 'Gloria Hallelujah', cursive;
+}
+
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
   border-top: 16px solid #3498db; /* Blue */
@@ -19,7 +23,15 @@
 	max-width: 15cm;
 	margin: auto;
 	margin-top: 2cm;
-	background-color: #fff952;
+	
 	padding: 2cm;
 	border-radius: 0.3cm;
+}
+
+.brand-bg-yellow {
+	background-color: #fff952;
+}
+
+.brand-bg-aqua {
+	background-color: #41f4e8;
 }
