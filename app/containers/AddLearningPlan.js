@@ -19,7 +19,7 @@
 
       ///////////////////////*********** Bootsrap Components **************////////////////////
 
-      import { Modal, FormControl } from 'react-bootstrap'
+      import { Modal, FormControl, Button, Spinner, InputGroup } from 'react-bootstrap'
 
       ////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@
           this.state = {
             objective: "",
             isPublic: false,
-            endDate: new Data(),
+            endDate: new Date(),
             errorMessage: "",
             apiLoading: false
           };
@@ -40,11 +40,23 @@
           this.setState({ objective: event.target.value });
         }
 
-        handleCheckboxChange(event) {
-          this.setState({ isPublic: event.target.value });
+        handleCheckboxChange() {
+          this.setState({ isPublic: !this.state.isPublic });
+        }
+
+        addPlan() {
+          console.log("is public: " + this.state.isPublic);
+            this.props.addPlan(this.state.objective, this.state.isPublic, this.state.endDate, this);
         }
 
         render() {
+          let spinner = <Spinner
+                        as="span"
+                        animation="grow"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                      />;
           return (
             <Modal show={this.props.isShowing} onHide={this.props.handleClose}>
               <Modal.Header closeButton>
@@ -59,20 +71,17 @@
                   onChange={this.handleObjectiveChange.bind(this)}
                 />
                 <br />
-                <FormControl 
-                  type='checkbox'
-                  label="isPublic"
-                  defaultValue={false}
-                  onChange={this.handleCheckboxChange.bind(this)}
-                />
+                <InputGroup.Checkbox checked={this.state.isPublic} onChange={this.handleCheckboxChange.bind(this)} /><span>Is public? (other people can search this plan)</span>
+                          
               </Modal.Body>
               <Modal.Footer>
                 <Button variant="secondary" onClick={this.props.handleClose}>
                   Close
                 </Button>
                 <Button variant="primary" onClick={this.addPlan.bind(this)}>
-                 Add New Plan
+                 { (this.state.apiLoading) ? spinner : false } Add New Plan
                 </Button>
+                { this.state.errorMessage }
               </Modal.Footer>
             </Modal>
           )
@@ -87,8 +96,8 @@
         addPlan: function(objective, isPublic, endDate, it) {
           it.setState({ apiLoading: true });
           addPlanForUser(objective, isPublic, endDate, (result, message, data) => {
-            if(result === "ERROR" || result === "FAILED") it.setState({ errorMessage: message });
-            if(result === "SUCCESS") dispatch(addLessonPlan(data)); it.setState({ errorMessage: "" });
+            if(result === "ERROR" || result === "FAILED") { it.setState({ errorMessage: message }); }
+            if(result === "SUCCESS") { dispatch(addLessonPlan(data)); it.setState({ errorMessage: "" }); ownProps.handleClose(); }
             it.setState({ apiLoading: false });
           });
         }

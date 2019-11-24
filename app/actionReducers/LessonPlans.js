@@ -24,10 +24,7 @@ export function userLessons(state = [], action) {
 			return action.lessons;
 		}
 		case 'SET_USER_SINGLE_LESSON': {
-			return { 
-			    ...state,
-			    arr: state.arr.concat(action.lesson)
-			}
+			return  state.concat([ action.lesson]);
 		}
 		case 'REMOVE_USER_SINGLE_LESSON': {
 

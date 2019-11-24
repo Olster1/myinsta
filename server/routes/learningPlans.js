@@ -88,12 +88,14 @@ router.post('/createPlan', checkToken, (req, httpRes, next) => {
 
 	plan.save((err, result) => {
 		if(err) {
+			console.log("was error");
 			httpRes.json({
 				result: constants.ERROR,
 				data: {},
 				message: 'error saving',
 			});
 		} else {
+			console.log("successful");
 			httpRes.json({
 				result: constants.SUCCESS,
 				data: result,

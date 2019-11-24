@@ -4,6 +4,8 @@ import {
 } from "react-router-dom";
 import { connect } from 'react-redux';
 
+import { Link } from 'react-router-dom';
+
 ///////////////************ API *************////////////////////
 
 import {  getPlansForUser, addPlanForUser, removePlanFromUser } from "../utils/api"
@@ -61,10 +63,13 @@ class LearningPlanOverview extends Component {
 						    />;
 
 		const myPlans = this.props.userLessons.map((p) => {
+			const color = p.isPublic ? "brand-bg-aqua" : "brand-bg-yellow";
+			const link = '/plan/' + p._id;
+			const cssClasses = "my-form-div " + color;
 			return (
-				<div>
+				<Link key={p._id} to={ link }><div className={cssClasses}>
 					{ p.objective }
-				</div>
+				</div></Link>
 			);
 		});
 
@@ -79,10 +84,10 @@ class LearningPlanOverview extends Component {
 				</div> );
 		} else {
 			return (
-		        <div className="my-form-div brand-bg-yellow">
+		        <div className="my-form-div">
 		        	<h1>My Plans</h1>
 		        	{ myPlans }
-		        	<Button variant="primary" type="submit" onClick={this.handleModalOpen.bind(this)}>
+		        	<Button variant="primary" onClick={this.handleModalOpen.bind(this)}>
 		        		{ (this.state.apiLoading) ? spinner : false }
 		        	  Add New Plan
 		        	</Button>

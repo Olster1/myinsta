@@ -18,12 +18,16 @@ const MyNavBar = ({ loggedIn, logout }) => {
   let registerLink = <LinkContainer  to='/register'><Nav.Link>Register</Nav.Link></LinkContainer>
   let logoutLink = false;
   let checkoutLink = false;
+  let plansLink = false;
+  let profileLink = false;
 
   if(loggedIn) {
     loginLink = false;
     registerLink = false;
     logoutLink = <Nav.Link onClick={ logout } >Logout</Nav.Link>
     checkoutLink=  <LinkContainer  to='/checkout'><Nav.Link>Checkout</Nav.Link></LinkContainer>
+    plansLink = <LinkContainer  to='/plans'><Nav.Link>My Plans</Nav.Link></LinkContainer>
+    profileLink = <LinkContainer  to='/profile/0'><Nav.Link>Profile</Nav.Link></LinkContainer>
   }
 
   return (
@@ -35,11 +39,10 @@ const MyNavBar = ({ loggedIn, logout }) => {
         <LinkContainer  to='/'><Nav.Link>Home</Nav.Link></LinkContainer>
         { loginLink }
         { registerLink }
+        { plansLink }
         { checkoutLink }
-        <LinkContainer  to='/plan/0'><Nav.Link>Plan</Nav.Link></LinkContainer>
-        <LinkContainer  to='/feed'><Nav.Link>Feed</Nav.Link></LinkContainer>
-        <LinkContainer  to='/post/0'><Nav.Link>Single Post</Nav.Link></LinkContainer>
-        <LinkContainer  to='/profile/0'><Nav.Link>Profile</Nav.Link></LinkContainer>
+        { profileLink }
+        
         { logoutLink } 
         </Nav>
       </Navbar.Collapse>

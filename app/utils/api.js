@@ -31,6 +31,7 @@ function sendRequest(request, callback) {
 	.then((data) => {
 		callback(data.result, data.message, data.data);
 	}).catch((error) => {
+		console.log(error);
 		callback("ERROR", "Server error", {});
 	});
 }

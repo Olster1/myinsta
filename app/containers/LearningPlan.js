@@ -34,16 +34,18 @@ class LearningPlan extends Component {
 		//@speed
 		let result = null;
 
+		console.log("planid " + planId);
 		//NOTE(ollie): Find the plan
 		for(let i = 0; i < it.props.userLessons.length && result === null; ++i) {
 			const plan = it.props.userLessons[i];
-			if(plan.id === planId) {
+			if(plan._id === planId) {
 				result = plan;
 				break;
 			}
 		}
 		//
 
+		console.log("plan " + result);
 		this.setState({ plan: result });
 
 		return result;
@@ -87,7 +89,9 @@ class LearningPlan extends Component {
 		} else {
 			return (
 		        <div className="my-form-div brand-bg-yellow">
-		        	<p>My Plan</p>
+		        	<h1>My Plan</h1>
+		        	<h3>My Goal is to { this.state.plan.objective }</h3>
+
 		        </div>
 		    );
 		}
