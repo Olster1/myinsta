@@ -104,6 +104,7 @@ router.post('/register', checkNoToken, (req, httpRes, next) => {
 
 	userModel.find({ email: email }, (err, documentResult) => {
 		if(err) {
+			console.log("error 1");
 			//NOTE(ollie): go to the express middleware to handle error
 			return next(err);
 		}
@@ -116,13 +117,15 @@ router.post('/register', checkNoToken, (req, httpRes, next) => {
 				email: email
 			});
 
-			newUser.save((err, result) => {
-				if(err) {
+			newUser.save((err2, result) => {
+				if(err2) {
+					console.log("error 1");
 					//NOTE(ollie): go to the express middleware to handle error
-					return next(err);
+					return next(err2);
 				}
 
-				console.log("new user id is: " + documentResult[0]._id);
+				console.log(result);
+				console.log("new user id is: " + result._id);
 
 				initUserSession(httpRes, result);
 			});
@@ -143,21 +146,22 @@ router.post('/register', checkNoToken, (req, httpRes, next) => {
 // define the home page route
 router.post('/isLoggedIn', checkToken, (req, res) => {
 	console.log(req.userId);
-	userModel.find({_id: req.userId}, (error, document) => {
+	userModel.find({_id: req.userId}, (error, doc) => {
 		if(error) {
 			return next(error);
 		} else {
-			const result = {
-				_id: document._id,
-				email: document.email,
-				isLoggedIn: true,
-			};
-
-			res.json({
-				result: constants.SUCCESS,
-				data: result,
-				message: 'is logged in',
-			});
+			console.log("doc is " + doc);
+			if(doc === null) {
+				return res.json({
+					result: constants.FAILED,
+					data: {},
+					message: 'You account doesnt exist' 
+				});
+			} else {
+				console.log("initi user session");
+				initUserSession(res, doc);
+			}
+			
 		}
 	});
 

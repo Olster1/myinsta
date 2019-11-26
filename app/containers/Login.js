@@ -61,7 +61,7 @@ class Login extends Component {
 
 		if(this.props.isLoggedIn) {
 			return (
-				<Redirect to='/' />
+				<Redirect to='/plans' />
 			)
 		} else {
 			return (

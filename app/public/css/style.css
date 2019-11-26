@@ -35,3 +35,18 @@ body {
 .brand-bg-aqua {
 	background-color: #41f4e8;
 }
+
+
+.blog-div {
+	text-align: center;
+	width: 80%;
+	max-width: 30cm;
+	margin: auto;
+
+}
+
+.blog-photo {
+	width: 80%;
+	max-width: 40cm;
+	height: auto;
+}

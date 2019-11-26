@@ -41,6 +41,15 @@ import Loader from './Loader';
 import Default404 from './404';
 import HomePage from './Homepage';
 
+
+///////////////////////************ Articles *************////////////////////
+/*
+This is just temporary. We eventaully want to store it in the database & just retrive what 
+article we actually need based on the paramerter in url. 
+*/
+
+import MindsetArticle from './articles/mindset';
+
 ////////////////////////////////////////////////
 
 class App extends Component {
@@ -65,11 +74,17 @@ class App extends Component {
         <Route path="/plans">
           <LearningPlansOverview />
         </Route>
-        <Route path="/profile/:profileId">
+        <Route path="/profile">
           <Profile />
         </Route>
         <Route path="/checkout">
           <MyStoreCheckout />
+        </Route>
+         <Route path="/articles/mindset" exact >
+          <MindsetArticle />
+        </Route>
+        <Route path="/" exact >
+          <HomePage />
         </Route>
         <Route>
           <Default404 />
@@ -115,6 +130,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
           })
         );
       } else {
+        console.log(data);
         dispatch(setUserData(data));
         console.log("setting user info");
       }

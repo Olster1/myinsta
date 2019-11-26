@@ -27,7 +27,7 @@ const MyNavBar = ({ loggedIn, logout }) => {
     logoutLink = <Nav.Link onClick={ logout } >Logout</Nav.Link>
     checkoutLink=  <LinkContainer  to='/checkout'><Nav.Link>Checkout</Nav.Link></LinkContainer>
     plansLink = <LinkContainer  to='/plans'><Nav.Link>My Plans</Nav.Link></LinkContainer>
-    profileLink = <LinkContainer  to='/profile/0'><Nav.Link>Profile</Nav.Link></LinkContainer>
+    profileLink = <LinkContainer  to='/profile'><Nav.Link>Profile</Nav.Link></LinkContainer>
   }
 
   return (

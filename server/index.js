@@ -155,9 +155,10 @@ app.get('/*', (req, res) => {
 //error handles
 app.use((error, req, res, next) => {
 	console.log(error);
-	res.status(500).send({
-		successful: false,
-   		reason: 'This is an error!'
+	res.status(500).json({
+		result: 'ERROR',
+		data: {},
+		message: "something went wrong"
 	});
 });
 
