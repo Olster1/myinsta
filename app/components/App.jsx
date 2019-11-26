@@ -121,6 +121,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     dispatch(setLoadingUser(true));
     isLoggedIn((result, message, data) => {
       console.log(message);
+      console.log(data);
+      console.log(result);
       if(result === "ERROR" || result === "FAILED") {
         console.log("failed");
         dispatch(setUserData({

@@ -13,8 +13,11 @@ module.exports.checkToken = function(req, res, next) {
         			message: 'there was an error verifying your login' 
         		});
         	} else {
-        		console.log(decoded);
+        		console.log("decoded is ");
+                console.log(decoded);
         		req.userId = decoded.userId;
+                console.log(req.userId);
+                console.log(decoded.userId);
         		return next();
         	}
    		});

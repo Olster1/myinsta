@@ -18,6 +18,8 @@ function initUserSession(httpRes, documentResult) {
 	//STICK IT IN A COOKIE
 	httpRes.cookie('jwt_token', token, {maxAge: 90000000, httpOnly: true, secure: false, overwrite: true});
 
+	console.log("sendign result");
+
 	//SEND BACK THE RESULT
 	httpRes.json({
 		result: constants.SUCCESS,
@@ -144,22 +146,21 @@ router.post('/register', checkNoToken, (req, httpRes, next) => {
 
 
 // define the home page route
-router.post('/isLoggedIn', checkToken, (req, res) => {
-	console.log(req.userId);
-	userModel.find({_id: req.userId}, (error, doc) => {
+router.post('/isLoggedIn', checkToken, (req, httpRes) => {
+	userModel.findOne({_id: req.userId}, (error, doc) => {
 		if(error) {
 			return next(error);
 		} else {
-			console.log("doc is " + doc);
+			
 			if(doc === null) {
-				return res.json({
+				return httpRes.json({
 					result: constants.FAILED,
 					data: {},
 					message: 'You account doesnt exist' 
 				});
 			} else {
-				console.log("initi user session");
-				initUserSession(res, doc);
+				initUserSession(httpRes, doc);
+
 			}
 			
 		}
