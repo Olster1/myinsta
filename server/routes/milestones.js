@@ -14,6 +14,7 @@ const mongoose = require('mongoose');
 
 const planModel = require(path.resolve(__dirname, '../models/learningPlan.js'));
 const userModel = require(path.resolve(__dirname, '../models/users.js'));
+const milestoneModel = require(path.resolve(__dirname, '../models/milestone.js'));
 
 ////////////////////////////////////////////////////////////////////
 
@@ -21,98 +22,69 @@ var router = express.Router();
 
 ///////////////////////************ GET REQUETS *************////////////////////
 
-router.post('/getPlansForUser', checkToken, (req, httpRes, next) => {
-	const userId = req.userId;
-
-	console.log("userId is: " + userId);
-
-	planModel.find({ ownerIds: userId }, (err, documentResult) => {
-		if(err) {
-			httpRes.json({
-				result: constants.ERROR,
-				data: {},
-				message: 'Something went wrong with database',
-			});
-		}
-
-		httpRes.json({
-			result: constants.SUCCESS,
-			data: documentResult,
-			message: 'You got the data',
-		});
-
-	});
-});
-
-router.post('/getSinglePlanForUser', checkToken, (req, httpRes, next) => {
-	const userId = req.userId;
-
-	const planId = req.body.planId;
-
-	console.log("userId is: " + userId);
-
-	planModel.findOne({ _id: planId, ownerIds: userId }, (err, documentResult) => {
-		if(err) {
-			httpRes.json({
-				result: constants.ERROR,
-				data: {},
-				message: 'Something went wrong with database',
-			});
-		}
-
-		if(documentResult != null) {
-			httpRes.json({
-				result: constants.SUCCESS,
-				data: documentResult,
-				message: 'You got the data',
-			});
-		} else {
-			httpRes.json({
-				result: constants.FAILED,
-				data: {},
-				message: 'No Plan found',
-			});
-		}
-	});
-});
-
+//NOTE(ollie): Get requests done through requesting a learning plan
 
 ///////////////////////************* CREATE REQUESTS ************////////////////////
 
+router.post('/createMilestone', checkToken, (req, httpRes, next) => {
 
-router.post('/createPlan', checkToken, (req, httpRes, next) => {
+	const userId = req.userId;
+	const planId = req.body.planId;
 
-	const ids = [ req.userId ];
+	planModel.findOne({ _id: planId, ownerIds: userId }, (err, documentResult) => {
+			if(documentResult != null) {
 
-	const plan = new planModel({
-		objective: req.body.objective,
-		isPublic: req.body.isPublic,
-		ownerIds: ids
+				const milestone = new milestoneModel({
+					objective: req.body.objective,
+					type: req.body.type,
+					planId: planId,
+					content: req.body.content,
+					depth: req.body.depth,
+					childrenIds: []
+				});
+
+				milestone.save((err, result) => {
+					if(err) {
+						console.log("was error");
+						httpRes.json({
+							result: constants.ERROR,
+							data: {},
+							message: 'error saving',
+						});
+					} else {
+						milestoneModel.updateOne({ _id: req.body.parentId }, { $push: { childrenIds: result._id } }, (updateErr, updateRes) => {
+							if(updateErr) {
+								console.log("was error");
+								httpRes.json({
+									result: constants.ERROR,
+									data: {},
+									message: 'error saving',
+								}); 
+							} else {
+								httpRes.json({
+									result: constants.SUCCESS,
+									data: result,
+									message: 'save successful',
+								});
+							}
+						});
+					}
+				});
+
+			} else {
+				httpRes.json({
+					result: constants.FAILED,
+					data: {},
+					message: 'User not part of the learning plan',
+				});
+			}
 	});
-
-	plan.save((err, result) => {
-		if(err) {
-			console.log("was error");
-			httpRes.json({
-				result: constants.ERROR,
-				data: {},
-				message: 'error saving',
-			});
-		} else {
-			console.log("successful");
-			httpRes.json({
-				result: constants.SUCCESS,
-				data: result,
-				message: 'save successful',
-			});
-		}
-	});
-
+	
 });
 
 ///////////////////////************ UPDATE REQUESTS *************////////////////////
 
-router.post('/updatePlan', checkToken, (req, httpRes, next) => {
+router.post('/updateMilestone', checkToken, (req, httpRes, next) => {
 	const userId = req.userId;
 	const planId = req.body.planId;
 
@@ -144,7 +116,7 @@ router.post('/updatePlan', checkToken, (req, httpRes, next) => {
 
 ///////////////////////************* DELETE REQUESTS ************////////////////////
 
-router.post('/deletePlan', checkToken, (req, httpRes, next) => {
+router.post('/deleteMilestone', checkToken, (req, httpRes, next) => {
 	const userId = req.userId;
 	const planId = req.body.planId;
 
