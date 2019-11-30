@@ -15,6 +15,8 @@ import { addUserLessons } from "../actionReducers/LessonPlans.js";
 
 /////********** COMPONENTS *********///////////
 
+import AddMilestone from './AddMilestone';
+
 ///////////////////////*********** Bootsrap Components **************////////////////////
 
 import { Form, Button, Spinner } from 'react-bootstrap'
@@ -26,7 +28,9 @@ class LearningPlan extends Component {
 	  super();
 	  this.state = {
 	  	plan: null,
-	  	loading: true
+	  	loading: true,
+	  	showingModal: false,
+	  	apiLoading: false
 	  };
 	}
 
@@ -63,6 +67,37 @@ class LearningPlan extends Component {
    			this.setState({ loading: false });
    		}
   	}
+  	milestoneRecursive(myArray, depth) {
+  		if(myArray && myArray.length > 0) {
+  			return myArray.map(item => {
+  				const mVal = (depth*5) + "%";
+  				return (
+  				<div key={item._id} style={{ margin: mVal }}>
+  					<p>{item.objective}</p>
+  					<p>{item.content}</p>
+  					{ this.milestoneRecursive(item.items, depth + 1)}
+  				</div>
+  				)
+  			});	
+  		} else {
+  			return false;
+  		}
+  		
+  	}
+
+  	getMilestonesHtml() {
+  		const result = this.milestoneRecursive(this.state.plan.items, 0);
+  		console.log(result);
+  		return result;
+  	}
+
+  	handleModalClose() {
+  		this.setState({ showingModal: false });
+  	}
+
+  	handleModalOpen() {
+  		this.setState({ showingModal: true });
+  	}
 
 	render() {
 		let spinner = <Spinner
@@ -87,10 +122,16 @@ class LearningPlan extends Component {
 				<Redirect to='/plans' />
 			);
 		} else {
+			const milestones = this.getMilestonesHtml();
+			console.log(milestones);
 			return (
 		        <div className="my-form-div brand-bg-yellow">
 		        	<h1>My Plan</h1>
 		        	<h3>My Goal is to { this.state.plan.objective }</h3>
+		        	{ milestones }
+		    
+		        	{ this.state.errorMessage }
+		        	<AddMilestone handleModalOpen={this.handleModalOpen.bind(this)} apiLoading={this.state.apiLoading} planId={this.state.plan._id} parentId="0" depth="0" isShowing={this.state.showingModal} handleClose={this.handleModalClose.bind(this)} />
 
 		        </div>
 		    );
@@ -122,7 +163,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 		  console.log("setting loading to false");
 		  it.setState({ loading: false });
 		})
-	},
+	}
 
 })
 

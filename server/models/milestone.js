@@ -25,6 +25,12 @@ const mongoose = require('mongoose');
 		required: true
 	},
 
+	finished: { //depth in the array - 0 for root parents and +1 for each depth down
+		type: Boolean,
+		required: true
+	},
+
+
 	childrenIds: {
 		type: [mongoose.Schema.Types.ObjectId],
 		required: false
@@ -33,7 +39,7 @@ const mongoose = require('mongoose');
 	content: {
 		type: String,
 		required: true
-	}
+	},
 
 	extendedInfoId: { //this is for more complex info like a protfolio item or blog post etc. 
 		type: mongoose.Schema.Types.ObjectId,

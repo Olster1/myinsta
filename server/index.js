@@ -19,6 +19,7 @@ const path = require('path');
 const userRouter = require(path.resolve(__dirname, 'routes/user.js'))
 const checkoutRouter = require(path.resolve(__dirname, 'routes/checkout.js'))
 const learningPlanRouter = require(path.resolve(__dirname, 'routes/learningPlans.js'))
+const milestoneRouter = require(path.resolve(__dirname, 'routes/milestones.js'))
 
 ////////////////////////////////////////////////////////////////////
 
@@ -76,6 +77,9 @@ app.use('/user', userRouter);
 app.use('/learningPlans', learningPlanRouter);
 
 app.use('/checkout', checkoutRouter);
+
+app.use('/milestone', milestoneRouter);
+
 
 ////////////////////////////////////////////////////////////////////
 

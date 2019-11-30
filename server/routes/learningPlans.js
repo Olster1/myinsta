@@ -14,10 +14,61 @@ const mongoose = require('mongoose');
 
 const planModel = require(path.resolve(__dirname, '../models/learningPlan.js'));
 const userModel = require(path.resolve(__dirname, '../models/users.js'));
+const milestoneModel = require(path.resolve(__dirname, '../models/milestone.js'));
 
 ////////////////////////////////////////////////////////////////////
 
 var router = express.Router();
+
+///////////////////////*********** HELPER FUNCTIONS **************////////////////////
+
+function getMilestonesForPlan(plan, next, end, finalCb) {
+	//Get the milestones
+	console.log("starting looking");
+	console.log(plan._id);
+	milestoneModel.find({ planId: plan._id }, (err, milestones) => {
+		if(err) {
+			return next(err);
+		} else {
+			console.log("milestones");
+			console.log(milestones);
+
+			if(milestones.length === 0 && end) {
+				finalCb();	
+			} 
+
+			for(let i = 0; i < milestones.length; ++i) {
+				let m = milestones[i];
+
+				if(m.depth === 0) { //push on as parent
+					plan.items.push(m);
+				}
+
+				if(i === milestones.length - 1 && end && m.childrenIds.length === 0) {
+					finalCb();
+				}
+
+				for(let j = 0; j < m.childrenIds.length; ++j) {
+					milestoneModel.findOne({ _id: m.childrenIds[j]._id, planId: plan._id }, (err, milestoneSingle) => {
+						if(err) {
+							return next(err);
+						} else {
+							if(milestoneSingle) {
+								m.items[j] = milestoneSingle;	
+							}
+						}
+
+						if(i === milestones.length - 1 && j ===  m.childrenIds.length - 1 && end) {
+							finalCb();	
+						}
+					});
+				}
+			}
+
+
+		}
+	});
+}
 
 ///////////////////////************ GET REQUETS *************////////////////////
 
@@ -35,12 +86,15 @@ router.post('/getPlansForUser', checkToken, (req, httpRes, next) => {
 			});
 		}
 
-		httpRes.json({
-			result: constants.SUCCESS,
-			data: documentResult,
-			message: 'You got the data',
-		});
-
+		for (let i = 0; i < documentResult.length; i++) {
+			getMilestonesForPlan(documentResult[i], next, (i === (documentResult.length - 1)), () => {
+				httpRes.json({
+					result: constants.SUCCESS,
+					data: documentResult,
+					message: 'Got the data',
+				});
+			});
+		}
 	});
 });
 
@@ -61,11 +115,15 @@ router.post('/getSinglePlanForUser', checkToken, (req, httpRes, next) => {
 		}
 
 		if(documentResult != null) {
-			httpRes.json({
-				result: constants.SUCCESS,
-				data: documentResult,
-				message: 'You got the data',
+			getMilestonesForPlan(documentResult, next, true, () => {
+				httpRes.json({
+					result: constants.SUCCESS,
+					data: documentResult,
+					message: 'Got the data',
+				});
 			});
+
+			
 		} else {
 			httpRes.json({
 				result: constants.FAILED,
@@ -158,10 +216,16 @@ router.post('/deletePlan', checkToken, (req, httpRes, next) => {
 				message: 'Something went wrong with database',
 			});
 		} else {
-			httpRes.json({
-				result: constants.SUCCESS,
-				data: {},
-				message: 'delete successful',
+			planModel.delete({ planId: planId }, (err2) => {
+				if(err2) {
+					next(err2);
+				} else {
+					httpRes.json({
+						result: constants.SUCCESS,
+						data: {},
+						message: 'delete successful',
+					});	
+				}
 			});
 		}
 	});

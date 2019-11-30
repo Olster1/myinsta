@@ -15,11 +15,67 @@ export const removeLessonPlan = (id) => ({
 	id: id
 })
 
+export const addMilestone = (milestone, learningPlanId, parentId) => ({
+	type: 'ADD_MILESTONE',
+	milestone: milestone,
+	learningPlanId: learningPlanId,
+	parentId: parentId, 
+})
+
+export const removeMilestone = (id) => ({
+	type: 'REMOVE_MILESTONE',
+	id: id
+})
+
 //////////// REDUCERS //////////////////
+
+function findMilestoneRecursive(parentId, itemsArray){
+	let result = null;
+	if(itemsArray) {
+		for (var i = itemsArray.length - 1; i >= 0 && result === null; i--) {
+			m = itemsArray[i];
+
+			if(m._id === parentId) {
+				result = m;
+				break;
+			} else if(m.items.length > 0) { //has children
+				result = findMilestoneRecursive(parentId, m.items);
+			}
+		}
+	}
+
+	return result;
+} 
 
 export function userLessons(state = [], action) {
 
 	switch(action.type) {
+		case 'ADD_MILESTONE': {
+			let index = -1;
+			for(let i = 0; i < state.length && index < 0; ++i) {
+				console.log(action.learningPlanId);
+				console.log(state[i]._id);
+
+				if(state[i]._id === action.learningPlanId) {
+					index = i;
+					break;
+				} 
+			}
+
+			console.log("ERROR: COUDLNT FIND PLAN" + index);
+
+			let myArray = state[index].items;
+			if(action.parentId > 0) { //is valid
+				myArray = findMilestoneRecursive(parentId, state[index].items).items;	
+			} 
+
+			myArray.push(action.milestone);
+
+			return state;
+		}
+		case 'REMOVE_MILESTONE': {
+
+		}
 		case 'SET_USER_LESSONS': {
 			return action.lessons;
 		}

@@ -102,4 +102,39 @@ export function removePlanFromUser(id, callback) {
 	sendRequest(request, callback);
 }
 
+export function addMilestoneToPlan(planId, objective, type, parentId, content, depth, callback) {
+	let request = buildPostRequest('/milestone/createMilestone', { 
+		planId: planId, 
+		objective: objective, 
+		type: type, 
+		parentId: parentId, 
+		content: content, 
+		depth: depth
+	});
+	sendRequest(request, callback);
+}
+
+export function updateMilestone(milestoneId, finished, planId, callback) {
+	let request = buildPostRequest('/milestone/updateMilestone', { 
+		finished: finished, 
+		planId: planId, 
+		milestoneId: milestoneId
+	});
+	sendRequest(request, callback);
+}
+
+export function deleteMilestone(planId, milestoneId, parentId, depth) {
+	let request = buildPostRequest('/milestone/deleteMilestone', { 
+		planId: planId, 
+		milestoneId: milestoneId,
+		parentMilestoneId: parentId, 
+		depth: depth
+	});
+	sendRequest(request, callback);
+}
+
+
+
+
+
 

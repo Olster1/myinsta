@@ -32,26 +32,32 @@ router.post('/createMilestone', checkToken, (req, httpRes, next) => {
 	const planId = req.body.planId;
 
 	planModel.findOne({ _id: planId, ownerIds: userId }, (err, documentResult) => {
-			if(documentResult != null) {
+		if(err) {
+			return next(err);
+		}
+		if(documentResult != null) {
 
-				const milestone = new milestoneModel({
-					objective: req.body.objective,
-					type: req.body.type,
-					planId: planId,
-					content: req.body.content,
-					depth: req.body.depth,
-					childrenIds: []
-				});
+			const milestone = new milestoneModel({
+				objective: req.body.objective,
+				type: req.body.type,
+				planId: planId,
+				content: req.body.content,
+				depth: req.body.depth,
+				childrenIds: [],
+				finished: false
+			});
 
-				milestone.save((err, result) => {
-					if(err) {
-						console.log("was error");
-						httpRes.json({
-							result: constants.ERROR,
-							data: {},
-							message: 'error saving',
-						});
-					} else {
+			milestone.save((err2, result) => {
+				if(err2) {
+					console.log("was error");
+					httpRes.json({
+						result: constants.ERROR,
+						data: {},
+						message: 'error saving',
+					});
+				} else {
+					if(req.body.depth > 0) {
+						//NOTE(ollie): Need to add it to parent
 						milestoneModel.updateOne({ _id: req.body.parentId }, { $push: { childrenIds: result._id } }, (updateErr, updateRes) => {
 							if(updateErr) {
 								console.log("was error");
@@ -68,16 +74,23 @@ router.post('/createMilestone', checkToken, (req, httpRes, next) => {
 								});
 							}
 						});
+					} else {
+						httpRes.json({
+							result: constants.SUCCESS,
+							data: result,
+							message: 'save successful',
+						});
 					}
-				});
+				}
+			});
 
-			} else {
-				httpRes.json({
-					result: constants.FAILED,
-					data: {},
-					message: 'User not part of the learning plan',
-				});
-			}
+		} else {
+			httpRes.json({
+				result: constants.FAILED,
+				data: {},
+				message: 'User not part of the learning plan',
+			});
+		}
 	});
 	
 });
@@ -87,28 +100,23 @@ router.post('/createMilestone', checkToken, (req, httpRes, next) => {
 router.post('/updateMilestone', checkToken, (req, httpRes, next) => {
 	const userId = req.userId;
 	const planId = req.body.planId;
+	const milestoneId = req.body.milestoneId;
 
-	console.log("userId is: " + userId);
-
-	const updatedPlan = {
-		objective: req.body.objective,
-		isPublic: req.body.isPublic,
-		ownerIds: req.body.ids,
-		updated_at: new Date()
-	};
-
-	planModel.updateOne({ _id: planId, ownerIds: userId }, updatedPlan, (err, result) => {
+	planModel.findOne({ _id: planId, ownerIds: userId }, (err, documentResult) => {
 		if(err) {
-			httpRes.json({
-				result: constants.ERROR,
-				data: {},
-				message: 'Something went wrong with database',
-			});
-		} else {
-			httpRes.json({
-				result: constants.SUCCESS,
-				data: {},
-				message: 'update successful',
+			return next(err);
+		}
+		if(documentResult != null) { //is part of a plan that the user owns
+			milestoneModel.updateOne({ _id: milestoneId }, { finished: req.body.finished, updated_at: new Date() }, (err2, documentResult) => {
+				if(err2) {
+					return next(err2);
+				} else {
+					httpRes.json({
+						result: constants.SUCCESS,
+						data: {},
+						message: 'updated successful',
+					});
+				}
 			});
 		}
 	});
@@ -119,21 +127,40 @@ router.post('/updateMilestone', checkToken, (req, httpRes, next) => {
 router.post('/deleteMilestone', checkToken, (req, httpRes, next) => {
 	const userId = req.userId;
 	const planId = req.body.planId;
+	const milestoneId = req.body.milestoneId;
+	const parentMilestoneId = req.body.parentId;
+	const depth = req.body.depth;
 
-	console.log("userId is: " + userId);
-
-	planModel.deleteOne({ _id: planId, ownerIds: userId }, (err) => {
+	planModel.findOne({ _id: planId, ownerIds: userId }, (err, documentResult) => {
 		if(err) {
-			httpRes.json({
-				result: constants.ERROR,
-				data: {},
-				message: 'Something went wrong with database',
-			});
-		} else {
-			httpRes.json({
-				result: constants.SUCCESS,
-				data: {},
-				message: 'delete successful',
+			return next(err);
+		}
+		if(documentResult != null) { //is part of a plan that the user owns
+			milestoneModel.deleteOne({ _id: milestoneId }, (err2) => {
+				if(err2) {
+					return next(err2);
+				} else {
+					if(depth > 0) {
+						//NOTE(ollie): Remove the id from 
+						milestoneModel.update({ _id: parentMilestoneId }, { $pull: { childrenIds: milestoneId } }, (err3) => {
+							if(err3) {
+								return next(err3);
+							} else {
+								httpRes.json({
+									result: constants.SUCCESS,
+									data: {},
+									message: 'deleted successful',
+								});	
+							}
+						});
+					} else {
+						httpRes.json({
+							result: constants.SUCCESS,
+							data: {},
+							message: 'deleted successful',
+						});	
+					}
+				}
 			});
 		}
 	});

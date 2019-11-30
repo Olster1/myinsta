@@ -1,7 +1,4 @@
-
-
-
-      import React, { Component } from 'react'
+import React, { Component } from 'react'
       import {
         Redirect
       } from "react-router-dom";
@@ -19,7 +16,7 @@
 
       ///////////////////////*********** Bootsrap Components **************////////////////////
 
-      import { Modal, FormControl, Button, Spinner, InputGroup } from 'react-bootstrap'
+      import { Form, Modal, FormControl, Button, Spinner, InputGroup } from 'react-bootstrap'
 
       ////////////////////////////////////////////////////////////////////
 
@@ -71,8 +68,9 @@
                   onChange={this.handleObjectiveChange.bind(this)}
                 />
                 <br />
-                <InputGroup.Checkbox checked={this.state.isPublic} onChange={this.handleCheckboxChange.bind(this)} /><span>Is public? (other people can search this plan)</span>
-                          
+                <Form.Group>
+                <Form.Check type="checkbox" checked={this.state.isPublic} onChange={this.handleCheckboxChange.bind(this)} /><span>Is public? (other people can search this plan)</span>
+                </Form.Group>
               </Modal.Body>
               <Modal.Footer>
                 <Button variant="secondary" onClick={this.props.handleClose}>
