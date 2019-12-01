@@ -31,7 +31,7 @@ let initialState = {
   userIsLoading: false,
   feedPosts: [],
   feedIsLoading: false,
-  userLessons: [],
+  userLessons: []
 };
 
 ///////////////////////////////

@@ -11,70 +11,74 @@ import {  getPlansForUser } from "../utils/api"
 
 //////*********** ACTIONS *******////////////
 
-import { addUserLessons } from "../actionReducers/LessonPlans.js";
+import { addUserLessons, setUserPlan } from "../actionReducers/LessonPlans.js";
 
 /////********** COMPONENTS *********///////////
 
 import AddMilestone from './AddMilestone';
+import Loader from '../components/Loader';
 
 ///////////////////////*********** Bootsrap Components **************////////////////////
 
-import { Form, Button, Spinner } from 'react-bootstrap'
+import { Form, Button, Spinner, ProgressBar } from 'react-bootstrap'
 
 ////////////////////////////////////////////////////////////////////
+
+function findPlan(planId, userLessons) {
+	//@speed
+	let result = null;
+
+	console.log("THE IDS" + userLessons);
+	//NOTE(ollie): Find the plan
+	for(let i = 0; i < userLessons.length && result === null; ++i) {
+		const plan = userLessons[i];
+		console.log("THE IDS");
+		console.log(planId);
+		console.log(plan._id);
+		if(plan._id === planId) {
+			result = plan;
+			break;
+		}
+	}
+	//
+
+	return result;
+}
 
 class LearningPlan extends Component {
 	constructor() {
 	  super();
 	  this.state = {
-	  	plan: null,
 	  	loading: true,
-	  	showingModal: false,
-	  	apiLoading: false
 	  };
 	}
 
-	findPlan(it, planId) {
-		//@speed
-		let result = null;
-
-		console.log("planid " + planId);
-		//NOTE(ollie): Find the plan
-		for(let i = 0; i < it.props.userLessons.length && result === null; ++i) {
-			const plan = it.props.userLessons[i];
-			if(plan._id === planId) {
-				result = plan;
-				break;
-			}
-		}
-		//
-
-		console.log("plan " + result);
-		this.setState({ plan: result });
-
-		return result;
-	}
+	
 
 	componentDidMount () {
-		
    		const planId = this.props.match.params.planId;
 
-   		let result = this.findPlan(this, planId);
-
-   		if(result === null) {
-   			this.props.retrievePlansForUser(planId, this); //just fetch everything
-   		} else {
+   		// let result = this.findPlan(this, planId);
+   		if(this.props.plan && this.props.plan._id === planId) {
    			this.setState({ loading: false });
-   		}
+   		} else {
+	   		this.props.retrievePlansForUser(planId, this); //just fetch everything
+	   	}
   	}
   	milestoneRecursive(myArray, depth) {
   		if(myArray && myArray.length > 0) {
   			return myArray.map(item => {
-  				const mVal = (depth*5) + "%";
+  				const button = (depth < 4) ? <AddMilestone planId={this.props.plan._id} parentId={item._id} depth={depth} /> : false;
+  				const mVal = (depth*10) + "%";
+  				const topClass = (depth === 1) ? "my-form-div brand-bg-yellow" : "";
+  				const myStyle = (depth === 1) ? {} : { marginLeft: mVal };
   				return (
-  				<div key={item._id} style={{ margin: mVal }}>
+  				<div key={item._id} style={ myStyle } className={topClass}>
+  					<ProgressBar now={40} />
   					<p>{item.objective}</p>
   					<p>{item.content}</p>
+  					{ button }
+  					<br />
   					{ this.milestoneRecursive(item.items, depth + 1)}
   				</div>
   				)
@@ -86,17 +90,8 @@ class LearningPlan extends Component {
   	}
 
   	getMilestonesHtml() {
-  		const result = this.milestoneRecursive(this.state.plan.items, 0);
-  		console.log(result);
+  		const result = this.milestoneRecursive(this.props.plan.items, 1);
   		return result;
-  	}
-
-  	handleModalClose() {
-  		this.setState({ showingModal: false });
-  	}
-
-  	handleModalOpen() {
-  		this.setState({ showingModal: true });
   	}
 
 	render() {
@@ -115,24 +110,27 @@ class LearningPlan extends Component {
 		} else if(this.state.loading) {
 			return (
 				<div>
-					{ spinner }
+					<Loader />
 				</div> );
-		} else if(!this.state.loading && !this.state.plan) {
+		} else if(!this.state.loading && !this.props.plan) {
+			
 			return (
-				<Redirect to='/plans' />
+				<Redirect to='/pages' />
 			);
 		} else {
 			const milestones = this.getMilestonesHtml();
-			console.log(milestones);
 			return (
-		        <div className="my-form-div brand-bg-yellow">
-		        	<h1>My Plan</h1>
-		        	<h3>My Goal is to { this.state.plan.objective }</h3>
+		        <div>
+		        	<div className="my-form-div brand-bg-yellow">
+		        		<h1>My Plan</h1>
+		        		<h3>My Goal is to { this.props.plan.objective }</h3>
+		        	</div>
 		        	{ milestones }
-		    
-		        	{ this.state.errorMessage }
-		        	<AddMilestone handleModalOpen={this.handleModalOpen.bind(this)} apiLoading={this.state.apiLoading} planId={this.state.plan._id} parentId="0" depth="0" isShowing={this.state.showingModal} handleClose={this.handleModalClose.bind(this)} />
 
+		        	<div className="my-form-div brand-bg-yellow">
+		        	{ this.state.errorMessage }
+		        	<AddMilestone planId={this.props.plan._id} parentId="0" depth="0" />
+		        	</div>
 		        </div>
 		    );
 		}
@@ -140,10 +138,16 @@ class LearningPlan extends Component {
 }
 
 
-const mapStateToProps = (state, ownProps) => ({
-  	isLoggedIn: state.userInfo.isLoggedIn,
-  	userLessons: state.userLessons,
-});
+const mapStateToProps = function(state, ownProps) {
+	const planId = ownProps.match.params.planId;
+  	const plan = findPlan(planId, state.userLessons);
+
+  	return {
+  		isLoggedIn: state.userInfo.isLoggedIn,
+  		userLessons: state.userLessons,
+  		plan: plan
+  	}
+}
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
 	retrievePlansForUser: function(planId, it) {
@@ -155,9 +159,6 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 		    console.log(message);
 		  } else {
 		    dispatch(addUserLessons(data));
-
-		    it.findPlan(it, planId);
-
 		    console.log("setting lessons info");
 		  }
 		  console.log("setting loading to false");

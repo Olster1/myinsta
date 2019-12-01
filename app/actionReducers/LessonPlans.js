@@ -15,11 +15,12 @@ export const removeLessonPlan = (id) => ({
 	id: id
 })
 
-export const addMilestone = (milestone, learningPlanId, parentId) => ({
+export const addMilestone = (milestone, learningPlanId, parentId, isChild) => ({
 	type: 'ADD_MILESTONE',
 	milestone: milestone,
 	learningPlanId: learningPlanId,
 	parentId: parentId, 
+	isChild: isChild
 })
 
 export const removeMilestone = (id) => ({
@@ -29,17 +30,17 @@ export const removeMilestone = (id) => ({
 
 //////////// REDUCERS //////////////////
 
-function findMilestoneRecursive(parentId, itemsArray){
+function findMilestoneRecursive(parentId, milestone){
 	let result = null;
-	if(itemsArray) {
-		for (var i = itemsArray.length - 1; i >= 0 && result === null; i--) {
-			m = itemsArray[i];
+	if(milestone.items) {
+		for (let i = milestone.items.length - 1; i >= 0 && result === null; i--) {
+			let m = milestone.items[i];
 
 			if(m._id === parentId) {
 				result = m;
 				break;
 			} else if(m.items.length > 0) { //has children
-				result = findMilestoneRecursive(parentId, m.items);
+				result = findMilestoneRecursive(parentId, m);
 			}
 		}
 	}
@@ -47,14 +48,13 @@ function findMilestoneRecursive(parentId, itemsArray){
 	return result;
 } 
 
+
 export function userLessons(state = [], action) {
 
 	switch(action.type) {
 		case 'ADD_MILESTONE': {
 			let index = -1;
 			for(let i = 0; i < state.length && index < 0; ++i) {
-				console.log(action.learningPlanId);
-				console.log(state[i]._id);
 
 				if(state[i]._id === action.learningPlanId) {
 					index = i;
@@ -62,19 +62,25 @@ export function userLessons(state = [], action) {
 				} 
 			}
 
-			console.log("ERROR: COUDLNT FIND PLAN" + index);
+			let newState =  Object.assign([], state);  //@speed there should be a better way
 
-			let myArray = state[index].items;
-			if(action.parentId > 0) { //is valid
-				myArray = findMilestoneRecursive(parentId, state[index].items).items;	
-			} 
+			if(index >= 0) {
+				let milestone = newState[index];
+				console.log("PARENT IA"+ action.parentId)
+				console.log("PARENT IF"+ (action.parentId > 0))
+				if(action.isChild) { //is valid
+					console.log("PARENT IF"+ action.parentId)
+					milestone = findMilestoneRecursive(action.parentId, newState[index]);	
+				} 
 
-			myArray.push(action.milestone);
+				milestone.items = milestone.items.concat([ action.milestone ]);
 
-			return state;
+			}
+
+			return newState;
 		}
 		case 'REMOVE_MILESTONE': {
-
+			return state;
 		}
 		case 'SET_USER_LESSONS': {
 			return action.lessons;

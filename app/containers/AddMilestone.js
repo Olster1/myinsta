@@ -29,7 +29,8 @@ constructor() {
     endDate: new Date(),
     errorMessage: "",
     apiLoading: false,
-    content: ""
+    content: "",
+    showingModal: false
   };
 }
 
@@ -46,10 +47,18 @@ handleChangeContent(event) {
 	this.setState({ content: event.target.value });
 }
 
+handleModalClose() {
+	this.setState({ showingModal: false });
+}
+
+handleModalOpen() {
+	this.setState({ showingModal: true });
+}
+
+
 addMilestone() {
-	console.log("HIS");
-	console.log(this);
-    this.props.addMilestoneToPlan(this.props.planId, this.state.objective, this.state.type, this.props.parentId, this.state.content, this.props.depth, this);
+	console.log(this.props.depth);
+    this.props.addMilestoneToPlan(this.props.planId, this.state.objective, this.state.type, this.props.parentId, this.state.content, this.props.depth, (this.props.depth > 0), this, this.handleModalClose.bind(this));
 }
 
 render() {
@@ -62,11 +71,11 @@ render() {
               />;
   return (
   	<div>
-  	<Button variant="primary" onClick={this.props.handleModalOpen}>
-  		{ (this.props.apiLoading) ? spinner : false }
+  	<Button variant="primary" onClick={this.handleModalOpen.bind(this)}>
+  		{ (this.state.apiLoading) ? spinner : false }
   	  Add New Milestone
   	</Button>
-    <Modal show={this.props.isShowing} onHide={this.props.handleClose}>
+    <Modal show={this.state.showingModal} onHide={this.handleModalClose.bind(this)}>
       <Modal.Header closeButton>
         <Modal.Title>Adding New Plan</Modal.Title>
       </Modal.Header>
@@ -99,7 +108,7 @@ render() {
 
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={this.props.handleClose}>
+        <Button variant="secondary" onClick={this.handleModalClose.bind(this)}>
           Close
         </Button>
         <Button variant="primary" onClick={this.addMilestone.bind(this)}>
@@ -118,12 +127,12 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-	addMilestoneToPlan: function(planId, objective, type, parentId, content, depth, it) {
+	addMilestoneToPlan: function(planId, objective, type, parentId, content, depth, isChild, it, handleModalClose) {
 	  it.setState({ apiLoading: true });
 	  addMilestoneToPlan(planId, objective, type, parentId, content, depth, (result, message, data) => {
 	    if(result === "ERROR" || result === "FAILED") { it.setState({ errorMessage: message }); }
 	    console.log(planId);
-	    if(result === "SUCCESS") { dispatch(addMilestone(data, planId, parentId)); it.setState({ errorMessage: "" }); ownProps.handleClose(); }
+	    if(result === "SUCCESS") { dispatch(addMilestone(data, planId, parentId, isChild)); it.setState({ errorMessage: "" }); handleModalClose(); }
 	    it.setState({ apiLoading: false });
 	  });
 	},

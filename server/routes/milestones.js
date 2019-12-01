@@ -56,6 +56,7 @@ router.post('/createMilestone', checkToken, (req, httpRes, next) => {
 						message: 'error saving',
 					});
 				} else {
+					console.log("depth is: " + req.body.depth);
 					if(req.body.depth > 0) {
 						//NOTE(ollie): Need to add it to parent
 						milestoneModel.updateOne({ _id: req.body.parentId }, { $push: { childrenIds: result._id } }, (updateErr, updateRes) => {

@@ -18,6 +18,7 @@ import { addUserLessons, addLessonPlan, removeLessonPlan } from "../actionReduce
 /////********** COMPONENTS *********///////////
 
 import AddLearningPlan from './AddLearningPlan';
+import Loader from '../components/Loader';
 
 ///////////////////////*********** Bootsrap Components **************////////////////////
 
@@ -80,7 +81,7 @@ class LearningPlanOverview extends Component {
 		} else if(this.state.loading) {
 			return (
 				<div>
-					{ spinner }
+					<Loader /> 
 				</div> );
 		} else {
 			return (

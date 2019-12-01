@@ -36,6 +36,11 @@ const mongoose = require('mongoose');
 		required: false
 	},
 
+	items: {
+		type: [],
+		required: false
+	},
+
 	content: {
 		type: String,
 		required: true
