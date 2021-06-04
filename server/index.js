@@ -14,6 +14,8 @@ const { checkToken } = require('./utils/auth.js')
 const path = require('path');
 //
 
+
+
 ///////////////////////************ ROUTERS *************////////////////////
 
 const userRouter = require(path.resolve(__dirname, 'routes/user.js'))
@@ -45,6 +47,32 @@ app.use(morgan('dev'));
 app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+
+
+
+/////////////////////////////////////////////
+const nodemailer = require('nodemailer');
+
+//NOTE: For Node Mailer
+
+let transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: {
+        user: 'ollietheexplorer@gmail.com',
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
+
+//////////////////////
+
+
+
+
 
 /****
 	STUDY: 
@@ -107,8 +135,28 @@ app.post('/getSecretMessage', checkToken, (req, res, next) => {
 });
 
 
+app.post('/add_to_email_list', (req, res, next) => {
+
+	const mailOptions = {
+	  from: 'ollietheexplorer@gmail.com',
+	  to: 'ollietheexplorer@gmail.com',
+	  subject: 'New Email Subscriber',
+	  text: 'Your new subscriber is ' + req.body.emailTo
+	};
 
 
+	transporter.sendMail(mailOptions, function(error, info){
+	  if (error) {
+	    return next(error);
+	  } else {
+	    res.json({
+    		result: 'SUCCESS',
+    		data: {},
+    		message: "Sent Mail to " + req.body.emailTo
+    	});
+	  }
+	});
+});
 
 
 app.post('/addTodo', (req, res, next) => {

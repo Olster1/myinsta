@@ -4,7 +4,11 @@ import ReactDOM from "react-dom";
 ///////////////////////*********** Bootstrap css **************////////////////////
 
 //NOTE(ollie): We don't need this since we load it from the CDN  
-// import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import "./public/css/MyCard.css"
+import "./public/css/style.css"
+
 
 ////////////////////////////////////////////////////////////////////
 

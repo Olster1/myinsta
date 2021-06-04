@@ -23,6 +23,7 @@
     "mongodb": "^3.3.3",
     "mongoose": "^5.7.7",
     "morgan": "^1.9.1",
+    "nodemailer": "^6.6.1",
     "react": "^16.11.0",
     "react-bootstrap": "^1.0.0-beta.15",
     "react-dom": "^16.11.0",
@@ -39,8 +40,10 @@
     "@babel/preset-env": "^7.6.3",
     "@babel/preset-react": "^7.6.3",
     "babel-loader": "^8.0.6",
+    "css-loader": "^3.2.1",
     "dotenv": "^8.2.0",
     "nodemon": "^1.19.4",
+    "style-loader": "^1.0.1",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   }

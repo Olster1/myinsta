@@ -10,7 +10,7 @@ var router = express.Router();
 
 if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 	const result = require('dotenv').config();
-	console.log(process.env.MY_SECRET_STRIPE_KEY)
+	// console.log(process.env.MY_SECRET_STRIPE_KEY)
 } 
 
 const stripe = require('stripe')(process.env.MY_SECRET_STRIPE_KEY);
